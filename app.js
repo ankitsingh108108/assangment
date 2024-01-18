@@ -1,5 +1,6 @@
 const express = require('express');
 const next = require('next');
+const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
 
@@ -17,6 +18,8 @@ const PORT = process.env.PORT || 3000;
 
 app.prepare().then(() => {
 	const server = express();
+
+	server.use(cors());
 
 	const connection = mongoose
 		.connect(process.env.MONGODB_URI, {
