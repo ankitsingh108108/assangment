@@ -1,16 +1,20 @@
-import AuthController from '../../../../controllers/auth';
-import withDbConnect from '../../../../utils/withDbConnect';
+import withDbConnect from "../../../../../utils/withDbConnect";
+import AuthController from "../../../../../controllers/auth";
 
 const handler = async (req, res) => {
-    const { method, path } = req;
+	const { method, path } = req;
 
-    switch (method) {
-        case 'POST':
-            return AuthController.login(req, res);
+	switch (method) {
+		case "POST":
+			return AuthController.login(req, res);
 
-        default:
-            return res.status(405).json({ status: false, message: 'Method Not Allowed', data: {} });
-    }
+		default:
+			return res.status(405).json({
+				status: false,
+				message: "Method Not Allowed",
+				data: {},
+			});
+	}
 };
 
 export default withDbConnect(handler);
