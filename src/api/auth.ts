@@ -2,9 +2,6 @@ import apiconfig from "./apiConfig";
 import { LoginFields } from "@/components/signForm";
 
 export const login = async (payload: LoginFields) => {
-	console.info(payload);
-	console.info(apiconfig);
-
 	const response = await fetch(`${apiconfig.defaultUrl}${apiconfig.login}`, {
 		headers: apiconfig.commonHeader,
 		method: "POST",
