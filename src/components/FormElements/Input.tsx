@@ -15,7 +15,7 @@ const Input = forwardRef(
         <input
           ref={ref}
           className={clx(
-            "bg-input h-[43px] border-transparent border outline-none focus:ring-0 focus-visible:ring-0 px-4 py-3 rounded-[10px] focus:border-input focus:bg-white focus:text-input transition-all duration-300",
+            "bg-input h-[43px] border outline-none focus:ring-0 focus-visible:ring-0 px-4 py-3 rounded-[10px] focus:border-input focus:bg-white focus:text-input transition-all duration-300",
             {
               "border-transparent": !error,
               "border-error focus:border-error text-error focus:text-error":

@@ -10,7 +10,7 @@ const Login = (props: Props) => {
   return (
     <section
       className={clx(
-        "flex min-h-[calc(100vh-117px)] flex-col items-center justify-center p-24",
+        "flex min-h-[calc(100vh-117px)] flex-col items-center justify-center md:p-24 sm:p-10 p-5",
         font.className
       )}
     >

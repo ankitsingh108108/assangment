@@ -9,6 +9,9 @@ import { z } from "zod";
 
 import { toast } from "react-toastify";
 import { login } from "@/api/auth";
+import Cookies from "js-cookie";
+import apiconfig from "@/api/apiConfig";
+import { useRouter } from "next/router";
 type Props = {};
 const loginFields: (Record<string, any> & {
   name: keyof LoginFields;
@@ -34,16 +37,19 @@ const loginFields: (Record<string, any> & {
 export type LoginFields = z.infer<typeof loginValidator>;
 
 const SignForm = (props: Props) => {
+  const router = useRouter();
   const id = useId();
   const { control, handleSubmit } = useForm<LoginFields>({
     resolver: zodResolver(loginValidator),
   });
   const onSubmit: SubmitHandler<LoginFields> = async (e) => {
-    console.info("first");
-
     try {
       const result = await login(e);
-      console.info(result);
+      if (result?.data.token) {
+        Cookies.set(apiconfig.accessToken, result?.data.token);
+
+        router.push("/");
+      }
     } catch (error) {
       toast("Please make sure email and password are correct.", {
         position: "top-center",
@@ -85,6 +91,7 @@ const SignForm = (props: Props) => {
               return (
                 <Input
                   {...field}
+                  value={field.value as string}
                   error={Boolean(error?.message?.length)}
                   helperText={
                     Boolean(error?.message?.length) ? error?.message : undefined

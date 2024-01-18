@@ -47,7 +47,7 @@ const CountButton = ({
 const Pagination = (props: PaginationProps) => {
   const { count, currentPage, onClickPage } = props;
   const countedArray = createCountArray(count);
-  return count ? (
+  return count > 1 ? (
     <div className="flex justify-center items-center">
       <NextButton
         className="mr-4"

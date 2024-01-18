@@ -1,22 +1,62 @@
+import apiconfig from "@/api/apiConfig";
+import { Movie, MovieResponse, getAllMovie } from "@/api/movie";
+import { useMovieInfinteQuery, useMovieQuery } from "@/api/movie-query";
 import { Button } from "@/components/Button";
 import MovieList from "@/components/movieList";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useMediaQuery } from "usehooks-ts";
 
-// export const getServerSideProps = (async () => {
-//   // Fetch data from external API
-//   const res = await fetch('https://api.github.com/repos/vercel/next.js')
-//   // Pass data to the page via props
-//   return { props: { res } }
-// })
+export const getServerSideProps = (async (req) => {
+  const token = req.req.cookies[apiconfig.accessToken];
+  let data: MovieResponse["data"] = { totalCount: 0, results: [] };
+  if (token) {
+    // Fetch data from external API
+    const pages = new URLSearchParams({
+      limit: String(apiconfig.limit),
+      page: "1",
+    });
+    const res = await getAllMovie(token, pages.toString());
+    data = res.data;
+  }
 
-export default function HomePage({ res }) {
-  const movies = ["asdf"];
-  return movies?.length ? (
-    <section className="p-[120px]">
-      <header className="flex justify-between mb-[120px]">
+  return { props: { movies: data } };
+}) satisfies GetServerSideProps<{ movies: MovieResponse["data"] }>;
+
+export default function HomePage({
+  movies,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const isMedia = useMediaQuery("(max-width: 768px)");
+  const [page, setPage] = useState<number>(1);
+  const router = useRouter();
+
+  const { allMovies, data, hasNextPage, fetchNextPage, isFetchingNextPage } =
+    useMovieInfinteQuery(
+      movies?.results?.length
+        ? { pageParams: [1], pages: [{ data: movies }] }
+        : undefined
+    );
+
+  const { data: movieData } = useMovieQuery(
+    router.query?.page ? (router.query.page as string) : 1
+  );
+
+  const onClickLogout = () => {
+    Cookies.remove(apiconfig.accessToken);
+    router.push("/login");
+  };
+
+  return allMovies?.length ? (
+    <section className="md:p-[120px] p-7">
+      <header className="flex justify-between md:mb-[120px] mb-7">
         <div className="flex items-center">
-          <h2 className="text-5xl">My movies</h2>
-          <button className="flex items-center mt-2 ml-3">
+          <h2 className="md:text-5xl sm:tex-3xl text-2xl">My movies</h2>
+          <button
+            className="flex items-center mt-2 ml-3"
+            onClick={() => router.push("/add")}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="32"
@@ -38,8 +78,11 @@ export default function HomePage({ res }) {
             </svg>
           </button>
         </div>
-        <button className="flex justify-center items-center font-bold text-base">
-          Logout
+        <button
+          className="flex justify-center items-center font-bold text-base"
+          onClick={onClickLogout}
+        >
+          <span className="sm:flex hidden">Logout</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={"16px"}
@@ -62,7 +105,20 @@ export default function HomePage({ res }) {
         </button>
       </header>
       <div>
-        <MovieList />
+        <MovieList
+          movies={isMedia ? allMovies : (movieData?.data.results as Movie[])}
+          page={router.query?.page ? Number(router.query.page) : 1}
+          totalCount={data?.pages[0]?.data?.totalCount}
+          onChangePage={(page) => {
+            router.push(`?page=${page}`);
+          }}
+          hasNextPage={hasNextPage}
+          onChangeInview={(i) => {
+            if (isMedia && i && hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+        />
       </div>
     </section>
   ) : (
