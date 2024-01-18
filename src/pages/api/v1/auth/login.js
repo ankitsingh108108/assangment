@@ -1,4 +1,3 @@
-import withDbConnect from "../../../../../utils/withDbConnect";
 import AuthController from "../../../../../controllers/auth";
 
 const handler = async (req, res) => {
@@ -17,4 +16,4 @@ const handler = async (req, res) => {
 	}
 };
 
-export default withDbConnect(handler);
+export default handler;
