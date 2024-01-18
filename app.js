@@ -1,24 +1,39 @@
 const express = require('express');
 const next = require('next');
+const rateLimit = require("express-rate-limit");
+const mongoose = require("mongoose");
 
-const dev = process.env.NODE_ENV !== 'production';
+const apiLimiter = rateLimit({
+	windowMs: 1000, // 1 second
+	max: 100, // limit each IP to 5 requests per windowMs
+});
+
+const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
 const handle = app.getRequestHandler();
-require('dotenv').config();
+require("dotenv").config();
 
 const PORT = process.env.PORT || 3000;
 
 app.prepare().then(() => {
-  const server = express();
+	const server = express();
 
-  server.use('/api/v1', require('./pages/api/v1'));
+	const connection = mongoose
+		.connect(process.env.MONGODB_URI, {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		})
+		.then((res) => console.log("Connected to MongoDB"))
+		.catch((err) => console.log(err));
 
-  server.all('*', (req, res) => {
-    return handle(req, res);
-  });
+	server.use("/api/v1", apiLimiter);
 
-  server.listen(PORT, (err) => {
-    if (err) throw err;
-    console.log(`Ready on http://localhost:${PORT}`);
-  });
+	server.all("*", (req, res) => {
+		return handle(req, res);
+	});
+
+	server.listen(PORT, (err) => {
+		if (err) throw err;
+		console.log(`Ready on http://localhost:${PORT}`);
+	});
 });

@@ -7,6 +7,5 @@ const movieSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
-const Movie = mongoose.model('Movie', movieSchema);
 
-module.exports = Movie;
+module.exports = mongoose.models.Movie || mongoose.model("Movie", movieSchema);
